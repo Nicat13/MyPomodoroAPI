@@ -14,5 +14,16 @@ namespace MyPomodoro.WebApi.Controllers
         {
             return Ok(await Mediator.Send(command));
         }
+        [HttpGet]
+        public IActionResult get([FromQuery] testgetmodel model)
+        {
+            return Ok(model);
+        }
+    }
+
+    public class testgetmodel
+    {
+        public int id { get; set; }
+        public string name { get; set; }
     }
 }

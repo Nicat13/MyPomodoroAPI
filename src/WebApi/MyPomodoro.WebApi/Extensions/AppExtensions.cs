@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using MyPomodoro.Application.Exceptions;
 using System;
 
-
 namespace MyPomodoro.WebApi.Extensions
 {
     public static class AppExtensions

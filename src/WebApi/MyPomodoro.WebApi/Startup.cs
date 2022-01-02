@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using MyPomodoro.Application;
+using MyPomodoro.Domain.Entities;
 using MyPomodoro.Infrastructure.Persistence;
+using MyPomodoro.Infrastructure.Persistence.Contexts;
 using MyPomodoro.WebApi.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace MyPomodoro.WebApi
 {
@@ -28,9 +26,15 @@ namespace MyPomodoro.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+            services.AddIdentity<ApplicationUser, IdentityRole<string>>().AddRoles<IdentityRole<string>>().AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
             services.AddControllers();
             services.AddApplicationLayer();
             services.AddPersistenceRegistration(Configuration);
+            services.AddPersistenceApiServices(Configuration);
             services.AddSwaggerGen();
         }
 

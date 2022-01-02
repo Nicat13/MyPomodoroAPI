@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using MyPomodoro.Application.Interfaces.Repositories;
 using MyPomodoro.Infrastructure.Persistence.Dapper;
 
@@ -15,7 +13,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
         }
         public void addDepart()
         {
-            var addDepartmentQuery = $"INSERT INTO Departments(Name,Description) VALUES('salamunalekumbabbaaa','sdfsdfsdfsdf');SELECT CAST(SCOPE_IDENTITY() as int)";
+            var addDepartmentQuery = $"INSERT INTO Departments(Name,Description) VALUES('shahshashah','sdfsdfsdfsdf');SELECT CAST(SCOPE_IDENTITY() as int)";
             var departmentId = dapper.Execute(addDepartmentQuery, null);
         }
     }
