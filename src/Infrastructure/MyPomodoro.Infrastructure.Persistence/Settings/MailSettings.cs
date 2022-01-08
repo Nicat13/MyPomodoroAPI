@@ -1,4 +1,3 @@
-using System;
 
 namespace MyPomodoro.Infrastructure.Persistence.Settings
 {

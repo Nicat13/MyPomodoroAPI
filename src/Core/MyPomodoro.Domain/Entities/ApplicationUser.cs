@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace MyPomodoro.Domain.Entities
@@ -21,6 +22,7 @@ namespace MyPomodoro.Domain.Entities
         public virtual ICollection<Task> Tasks { get; set; }
         public virtual ICollection<UserConfiguration> UserConfigurations { get; set; }
     }
+    [Table("RefreshTokens")]
     public class RefreshToken
     {
         public int Id { get; set; }

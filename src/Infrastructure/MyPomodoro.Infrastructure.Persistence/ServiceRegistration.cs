@@ -1,17 +1,26 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
+using MyPomodoro.Application.Exceptions;
 using MyPomodoro.Application.Interfaces.Repositories;
 using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
+using MyPomodoro.Domain.Entities;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 using MyPomodoro.Infrastructure.Persistence.Dapper;
 using MyPomodoro.Infrastructure.Persistence.Repositories;
 using MyPomodoro.Infrastructure.Persistence.Services;
 using MyPomodoro.Infrastructure.Persistence.Settings;
 using MyPomodoro.Infrastructure.Persistence.UnitOfWork;
-
+using Task = System.Threading.Tasks.Task;
 namespace MyPomodoro.Infrastructure.Persistence
 {
     public static class ServiceRegistration
@@ -21,7 +30,7 @@ namespace MyPomodoro.Infrastructure.Persistence
             services.AddDbContext<IdentityContext>(options =>
             options.UseSqlServer(configuration["APIAppSettings:ConnectionString"],
             b => b.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName)));
-
+            services.AddIdentity<ApplicationUser, IdentityRole<string>>().AddRoles<IdentityRole<string>>().AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -35,6 +44,7 @@ namespace MyPomodoro.Infrastructure.Persistence
             services.Configure<APIAppSettings>(configuration.GetSection("APIAppSettings"));
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IDateTimeService, DateTimeService>();
             services.AddScoped<IDapper, DapperClass>();
             services.AddScoped<IUowContext, UnitOfWorkContext>();
         }
@@ -45,5 +55,55 @@ namespace MyPomodoro.Infrastructure.Persistence
             services.AddScoped<ITestRepo, TestRepo>();
         }
         #endregion
+
+
+        public static void AddApiAuthentification(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(o =>
+                {
+                    o.SaveToken = false;
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        ValidIssuer = configuration["APIAppSettings:JWTSettings:Issuer"],
+                        ValidAudience = configuration["APIAppSettings:JWTSettings:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["APIAppSettings:JWTSettings:Key"]))
+                    };
+                    o.Events = new JwtBearerEvents()
+                    {
+                        OnMessageReceived = (c) =>
+                        {
+                            if (c.HttpContext.Request.Headers.TryGetValue("Token", out StringValues key))
+                            {
+                                c.Token = key.ToString();
+                            }
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = c =>
+                        {
+                            c.NoResult();
+                            throw new HttpStatusException(new List<string> { c.Exception.ToString() });
+                        },
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            throw new HttpStatusException(new List<string> { "You are not Authorized." }, HttpStatusCode.Unauthorized);
+                        },
+                        OnForbidden = context =>
+                        {
+                            throw new HttpStatusException(new List<string> { "You are not authorized to access this resource." }, HttpStatusCode.Forbidden);
+                        },
+                    };
+                });
+        }
     }
 }

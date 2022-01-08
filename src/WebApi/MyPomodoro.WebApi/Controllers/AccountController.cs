@@ -29,5 +29,27 @@ namespace MyPomodoro.WebApi.Controllers
         {
             return Ok(await _accountService.ConfirmEmailAsync(request.Email, request.Code));
         }
+        [HttpPost("authenticate")]
+        public async Task<IActionResult> AuthenticateAsync([FromBody] AuthenticationRequest request)
+        {
+            return Ok(await _accountService.AuthenticateAsync(request, GenerateIPAddress()));
+        }
+        [HttpPost("forgotpassword")]
+        public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
+        {
+            return Ok(await _accountService.ForgotPasswordAsync(request));
+        }
+        [HttpPost("resetpassword")]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
+        {
+            return Ok(await _accountService.ResetPasswordAsync(request));
+        }
+        private string GenerateIPAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                return Request.Headers["X-Forwarded-For"];
+            else
+                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        }
     }
 }
