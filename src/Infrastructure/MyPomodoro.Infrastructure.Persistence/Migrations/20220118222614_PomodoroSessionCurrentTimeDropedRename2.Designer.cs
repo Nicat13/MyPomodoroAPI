@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 
 namespace MyPomodoro.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20220118222614_PomodoroSessionCurrentTimeDropedRename2")]
+    partial class PomodoroSessionCurrentTimeDropedRename2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -293,7 +295,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.Property<int>("CurrentStep")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CurrentTime")
+                    b.Property<int?>("CurrentTime3")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")

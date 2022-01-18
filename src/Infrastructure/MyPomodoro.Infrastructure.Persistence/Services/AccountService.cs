@@ -102,54 +102,45 @@ namespace MyPomodoro.Infrastructure.Persistence.Services
 
         public async Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request, string ipAddress)
         {
-            try
+            var user = await _context.Users.Include(x => x.RefreshToken)
+                            .Where(x => x.Email == request.Email)
+                            .FirstOrDefaultAsync();
+            if (user == null)
             {
-                var user = await _context.Users.Include(x => x.RefreshToken)
-                                .Where(x => x.Email == request.Email)
-                                .FirstOrDefaultAsync();
-                if (user == null)
-                {
-                    throw new HttpStatusException(new List<string> { "Invalid Credentials." }, HttpStatusCode.Unauthorized);
-                }
-                if (!user.EmailConfirmed)
-                {
-                    await SendEmailVerification(user);
-                    throw new HttpStatusException(new List<string> { "Email verification link sent, Please verify your e-mail address." }, HttpStatusCode.Unauthorized);
-                }
-                var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
-                if (!result.Succeeded)
-                {
-                    throw new HttpStatusException(new List<string> { "Invalid Credentials." }, HttpStatusCode.Unauthorized);
-                }
-                DateTime userLocalTime = await _dateTimeService.GetLocalTime(ipAddress);
-                AuthenticationResponse response = new AuthenticationResponse();
-                response.Jwt = await GenerateJWToken(user, userLocalTime);
-                response.Email = user.Email;
-                response.Name = user.FirstName;
-
-                if (user.RefreshToken == null || user.RefreshToken.IsExpired)
-                {
-                    var refreshToken = GenerateRefreshToken(ipAddress, userLocalTime);
-                    user.RefreshToken = refreshToken;
-                    _context.Users.Update(user);
-                    _context.SaveChanges();
-                    response.RefreshToken = new RefreshTokenDto(refreshToken.Token, refreshToken.Expires);
-                }
-                else
-                {
-                    response.RefreshToken = new RefreshTokenDto(user.RefreshToken.Token, user.RefreshToken.Expires);
-                }
-                return response;
+                throw new HttpStatusException(new List<string> { "Invalid Credentials." }, HttpStatusCode.Unauthorized);
             }
-            catch (Exception e)
+            if (!user.EmailConfirmed)
             {
-                throw new HttpStatusException(new List<string> { e.Message });
+                await SendEmailVerification(user);
+                throw new HttpStatusException(new List<string> { "Email verification link sent, Please verify your e-mail address." }, HttpStatusCode.Unauthorized);
             }
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
+            if (!result.Succeeded)
+            {
+                throw new HttpStatusException(new List<string> { "Invalid Credentials." }, HttpStatusCode.Unauthorized);
+            }
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.Jwt = await GenerateJWToken(user);
+            response.Email = user.Email;
+            response.Name = user.FirstName;
+            if (user.RefreshToken == null || user.RefreshToken.IsExpired)
+            {
+                var refreshToken = GenerateRefreshToken(ipAddress);
+                user.RefreshToken = refreshToken;
+                _context.Users.Update(user);
+                _context.SaveChanges();
+                response.RefreshToken = new RefreshTokenDto(refreshToken.Token, refreshToken.Expires);
+            }
+            else
+            {
+                response.RefreshToken = new RefreshTokenDto(user.RefreshToken.Token, user.RefreshToken.Expires);
+            }
+            return response;
         }
 
 
 
-        private async Task<JwtTokenDto> GenerateJWToken(ApplicationUser user, DateTime localTime)
+        private async Task<JwtTokenDto> GenerateJWToken(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
             var roleClaims = new List<Claim>();
@@ -165,7 +156,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Services
             .Union(roleClaims);
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_apiSettings.JWTSettings.Key));
             var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var expires = (localTime).AddMinutes(_apiSettings.JWTSettings.DurationInMinutes);
+            var expires = _dateTimeService.NowUtc.AddMinutes(_apiSettings.JWTSettings.DurationInMinutes);
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _apiSettings.JWTSettings.Issuer,
                 audience: _apiSettings.JWTSettings.Audience,
@@ -183,19 +174,25 @@ namespace MyPomodoro.Infrastructure.Persistence.Services
             rngCryptoServiceProvider.GetBytes(randomBytes);
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
-        private RefreshToken GenerateRefreshToken(string ipAddress, DateTime localTime)
+        private RefreshToken GenerateRefreshToken(string ipAddress)
         {
             return new RefreshToken
             {
                 Token = RandomTokenString(),
-                Expires = localTime.AddMonths(6),
-                Created = localTime,
+                Expires = _dateTimeService.NowUtc.AddDays(_apiSettings.JWTSettings.RefreshTokenDuration),
+                Created = _dateTimeService.NowUtc,
                 CreatedByIp = ipAddress
             };
         }
-        public Task<JwtTokenDto> RevokeByRefreshToken(string token)
+        public async Task<JwtTokenDto> RevokeByRefreshToken(string token)
         {
-            throw new NotImplementedException();
+            var refreshToken = _context.RefreshTokens.Where(x => x.Token == token).FirstOrDefault();
+            if (refreshToken == null || refreshToken.IsExpired)
+            {
+                throw new HttpStatusException(new List<string> { $"Invalid Token." });
+            }
+            var user = _context.Users.Where(x => x.RefreshTokenId == refreshToken.Id).FirstOrDefault();
+            return await GenerateJWToken(user);
         }
 
         public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request)

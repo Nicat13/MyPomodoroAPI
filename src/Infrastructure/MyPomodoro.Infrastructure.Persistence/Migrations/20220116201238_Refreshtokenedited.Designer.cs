@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 
 namespace MyPomodoro.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20220116201238_Refreshtokenedited")]
+    partial class Refreshtokenedited
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,6 +257,15 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStep")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CurrentTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("LongBreakTime")
                         .HasColumnType("int");
 
@@ -267,6 +278,9 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.Property<int>("ShortBreakTime")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("StatusChangeTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -275,58 +289,6 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Pomodoros");
-                });
-
-            modelBuilder.Entity("MyPomodoro.Domain.Entities.PomodoroSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CurrentPomodoroPeriod")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentStep")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CurrentTime")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PomodoroId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SessionCreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("StatusChangeTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("TotalLongBreakTime")
-                        .HasColumnType("float");
-
-                    b.Property<double>("TotalPomodoroTime")
-                        .HasColumnType("float");
-
-                    b.Property<double>("TotalShortBreakTime")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PomodoroId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PomodoroSessions");
                 });
 
             modelBuilder.Entity("MyPomodoro.Domain.Entities.RefreshToken", b =>
@@ -375,7 +337,10 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PomodoroId")
+                    b.Property<string>("PomodoroId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PomodoroId1")
                         .HasColumnType("int");
 
                     b.Property<int>("TotalPomodoros")
@@ -386,7 +351,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PomodoroId");
+                    b.HasIndex("PomodoroId1");
 
                     b.HasIndex("UserId");
 
@@ -413,9 +378,6 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Pomodoro")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PomodoroPeriodCount")
                         .HasColumnType("int");
 
                     b.Property<int>("ShortBreak")
@@ -500,30 +462,11 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MyPomodoro.Domain.Entities.PomodoroSession", b =>
-                {
-                    b.HasOne("MyPomodoro.Domain.Entities.Pomodoro", "Pomodoro")
-                        .WithMany("PomodoroSessions")
-                        .HasForeignKey("PomodoroId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyPomodoro.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("PomodoroSessions")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Pomodoro");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MyPomodoro.Domain.Entities.Task", b =>
                 {
                     b.HasOne("MyPomodoro.Domain.Entities.Pomodoro", "Pomodoro")
                         .WithMany("Tasks")
-                        .HasForeignKey("PomodoroId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PomodoroId1");
 
                     b.HasOne("MyPomodoro.Domain.Entities.ApplicationUser", "User")
                         .WithMany("Tasks")
@@ -547,8 +490,6 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Pomodoros");
 
-                    b.Navigation("PomodoroSessions");
-
                     b.Navigation("Tasks");
 
                     b.Navigation("UserConfigurations");
@@ -556,8 +497,6 @@ namespace MyPomodoro.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MyPomodoro.Domain.Entities.Pomodoro", b =>
                 {
-                    b.Navigation("PomodoroSessions");
-
                     b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618

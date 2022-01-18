@@ -44,6 +44,11 @@ namespace MyPomodoro.WebApi.Controllers
         {
             return Ok(await _accountService.ResetPasswordAsync(request));
         }
+        [HttpPost("revokeByRefreshToken")]
+        public async Task<IActionResult> RevokeByRefreshToken([FromQuery] string refreshToken)
+        {
+            return Ok(await _accountService.RevokeByRefreshToken(refreshToken));
+        }
         private string GenerateIPAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
