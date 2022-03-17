@@ -32,6 +32,8 @@ namespace MyPomodoro.Application.DTOs
                     try
                     {
                         uow.TestRepo.addDepart();
+                        await uow.SaveChangesAsync();
+                        uow.TestRepo.addDepart2();
                         uow.Commit();
                     }
                     catch (Exception ex)

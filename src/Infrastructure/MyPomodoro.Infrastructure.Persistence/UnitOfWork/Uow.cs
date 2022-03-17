@@ -2,6 +2,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using MyPomodoro.Application.Interfaces.Repositories;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
@@ -13,7 +14,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
     public class Uow : IUow
     {
         private IDbConnection _sqlConnection;
-        private IDbTransaction _sqlTransaction;
+        private IDbContextTransaction _sqlTransaction;
         private IdentityContext _context;
         readonly ITestRepo _testrepo;
         public Uow(IUowContext connectionContext, IdentityContext context)
@@ -22,7 +23,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             ConnContext = connectionContext;
             _sqlConnection = connectionContext.GetConnection();
             var dapper = new DapperClass(ConnContext);
-            _testrepo = new TestRepo(dapper);
+            _testrepo = new TestRepo(dapper, context);
         }
         public ITestRepo TestRepo => _testrepo;
 
@@ -31,9 +32,9 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
         {
             await _context.SaveChangesAsync();
         }
-        public IDbTransaction BeginTransaction()
+        public IDbContextTransaction BeginTransaction()
         {
-            _sqlTransaction = _sqlConnection.BeginTransaction();
+            _sqlTransaction = _context.Database.BeginTransaction();
             ConnContext.CurrentTransaction = _sqlTransaction;
             return _sqlTransaction;
         }

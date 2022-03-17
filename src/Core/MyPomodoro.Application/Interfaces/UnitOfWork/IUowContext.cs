@@ -1,11 +1,12 @@
 
 using System.Data;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MyPomodoro.Application.Interfaces.UnitOfWork
 {
     public interface IUowContext
     {
-        IDbTransaction CurrentTransaction { get; set; }
+        IDbContextTransaction CurrentTransaction { get; set; }
         IDbConnection GetConnection();
         IUow GetUow();
     }

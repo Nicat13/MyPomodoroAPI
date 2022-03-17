@@ -1,0 +1,9 @@
+CREATE TRIGGER InsertUserConfiguration
+ON dbo.Users
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+	INSERT INTO UserConfigurations(AutoStartPomodoros,AutoStartBreaks,EmailNotification,PushNotification,UserId)
+	VALUES(0,0,0,1,(SELECT Id FROM INSERTED))
+END

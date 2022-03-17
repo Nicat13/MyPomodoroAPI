@@ -1,6 +1,6 @@
-using System;
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 
@@ -18,7 +18,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             _uow = new Uow(this, context);
         }
 
-        public IDbTransaction CurrentTransaction { get; set; }
+        public IDbContextTransaction CurrentTransaction { get; set; }
         public IDbConnection GetConnection()
         {
             return sqlConnection;
