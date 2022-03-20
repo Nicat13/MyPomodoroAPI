@@ -10,6 +10,7 @@ namespace MyPomodoro.Domain.Entities
         {
             PomodoroSessions = new HashSet<PomodoroSession>();
         }
+        public string Name { get; set; }
         public int PomodoroTime { get; set; }
         public int ShortBreakTime { get; set; }
         public int LongBreakTime { get; set; }

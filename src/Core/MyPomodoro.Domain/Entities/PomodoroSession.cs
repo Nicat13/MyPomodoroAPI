@@ -21,6 +21,8 @@ namespace MyPomodoro.Domain.Entities
         public PomodoroStatuses CurrentStatus { get; set; }
         public double? CurrentTime { get; set; }
         public DateTime? StatusChangeTime { get; set; }
+        public string Password { get; set; }
+        public string SessionShareCode { get; set; }
         public DateTime SessionCreateDate { get; set; }
         public bool IsActive { get; set; }
         public int PomodoroId { get; set; }

@@ -17,6 +17,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
         private IDbContextTransaction _sqlTransaction;
         private IdentityContext _context;
         readonly ITestRepo _testrepo;
+        readonly IPomodoroRepository _pomodoroRepository;
         public Uow(IUowContext connectionContext, IdentityContext context)
         {
             _context = context;
@@ -24,10 +25,14 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             _sqlConnection = connectionContext.GetConnection();
             var dapper = new DapperClass(ConnContext);
             _testrepo = new TestRepo(dapper, context);
+            _pomodoroRepository = new PomodoroRepository(dapper, context);
         }
+        public IPomodoroRepository PomodoroRepository => _pomodoroRepository;
         public ITestRepo TestRepo => _testrepo;
 
         public IUowContext ConnContext { get; set; }
+
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

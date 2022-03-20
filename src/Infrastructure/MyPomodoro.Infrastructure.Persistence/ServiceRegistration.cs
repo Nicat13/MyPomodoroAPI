@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
-using MyPomodoro.Application.Exceptions;
 using MyPomodoro.Application.Interfaces.Repositories;
 using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
@@ -31,6 +29,7 @@ namespace MyPomodoro.Infrastructure.Persistence
             options.UseSqlServer(configuration["APIAppSettings:ConnectionString"],
             b => b.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName)));
             services.AddIdentity<ApplicationUser, IdentityRole<string>>().AddRoles<IdentityRole<string>>().AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
+            services.AddApiAuthentification(configuration);
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -52,7 +51,6 @@ namespace MyPomodoro.Infrastructure.Persistence
         public static void AddPersistenceApiServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped<ITestRepo, TestRepo>();
         }
         #endregion
 
@@ -91,16 +89,24 @@ namespace MyPomodoro.Infrastructure.Persistence
                         OnAuthenticationFailed = c =>
                         {
                             c.NoResult();
-                            throw new HttpStatusException(new List<string> { c.Exception.ToString() });
+                            c.Response.StatusCode = 500;
+                            c.Response.ContentType = "text/plain";
+                            return c.Response.WriteAsync(c.Exception.ToString());
                         },
                         OnChallenge = context =>
                         {
                             context.HandleResponse();
-                            throw new HttpStatusException(new List<string> { "You are not Authorized." }, HttpStatusCode.Unauthorized);
+                            context.Response.StatusCode = 401;
+                            context.Response.ContentType = "text/plain";
+                            var result = "You are not Authorized";
+                            return context.Response.WriteAsync(result);
                         },
                         OnForbidden = context =>
                         {
-                            throw new HttpStatusException(new List<string> { "You are not authorized to access this resource." }, HttpStatusCode.Forbidden);
+                            context.Response.StatusCode = 403;
+                            context.Response.ContentType = "text/plain";
+                            var result = "You are not authorized to access this resource";
+                            return context.Response.WriteAsync(result);
                         },
                     };
                 });

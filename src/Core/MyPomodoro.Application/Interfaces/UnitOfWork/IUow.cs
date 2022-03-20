@@ -9,6 +9,7 @@ namespace MyPomodoro.Application.Interfaces.UnitOfWork
     public interface IUow : IDisposable
     {
         ITestRepo TestRepo { get; }
+        IPomodoroRepository PomodoroRepository { get; }
         IDbContextTransaction BeginTransaction();
         void Commit();
         void RollBack();

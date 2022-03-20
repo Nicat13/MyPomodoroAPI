@@ -8,7 +8,6 @@ using MyPomodoro.Application;
 using MyPomodoro.Infrastructure.Persistence;
 using MyPomodoro.WebApi.Extensions;
 
-
 namespace MyPomodoro.WebApi
 {
     public class Startup
@@ -43,9 +42,10 @@ namespace MyPomodoro.WebApi
             }
 
             app.UseHttpsRedirection();
-            app.UseErrorHandling();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseErrorHandling();
             app.UseSwaggerExtension();
             app.UseEndpoints(endpoints =>
             {

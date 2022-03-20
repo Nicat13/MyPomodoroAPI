@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using MyPomodoro.Application.DTOs;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace MyPomodoro.WebApi.Controllers
 {
@@ -13,10 +16,17 @@ namespace MyPomodoro.WebApi.Controllers
         {
             return Ok(await Mediator.Send(command));
         }
-        [HttpGet]
-        public IActionResult get([FromQuery] testgetmodel model)
+        [HttpGet("[action]")]
+        public IActionResult Salam([FromQuery] testgetmodel model)
         {
             return Ok(model);
+        }
+        [HttpPost("[action]")]
+        [Authorize]
+        public IActionResult AuthTest()
+        {
+            var id = User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            return Ok(id);
         }
         [HttpGet("[action]")]
         public IActionResult GetIP()
