@@ -1,9 +1,9 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro;
+using MyPomodoro.Application.Features.Pomodoros.Queries.GetPomodoroColors;
+using MyPomodoro.Application.Features.Pomodoros.Queries.GetUserPomodoros;
 
 namespace MyPomodoro.WebApi.Controllers
 {
@@ -15,8 +15,19 @@ namespace MyPomodoro.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> CreatePomodoro([FromBody] CreatePomodoroCommand command)
         {
-            command.UserId = User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
             return Ok(await Mediator.Send(command));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> UserPomodoros()
+        {
+            return Ok(await Mediator.Send(new GetUserPomodorosQuery()));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> PomodoroColors()
+        {
+            return Ok(await Mediator.Send(new GetPomodoroColorsQuery()));
         }
     }
 }

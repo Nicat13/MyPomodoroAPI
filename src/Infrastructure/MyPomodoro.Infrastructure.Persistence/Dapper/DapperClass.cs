@@ -11,7 +11,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Dapper
     public class DapperClass : IDapper
     {
         IUowContext connectionContext;
-        public IDbTransaction CurrentTransaction => (connectionContext.CurrentTransaction as IInfrastructure<DbTransaction>).Instance;
+        public IDbTransaction CurrentTransaction => (connectionContext.CurrentTransaction as IInfrastructure<DbTransaction>)?.Instance;
 
         public DapperClass(IUowContext connectionContext)
         {

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyPomodoro.Application.Exceptions;
+using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Domain.Entities;
 using Task = System.Threading.Tasks.Task;
@@ -21,20 +21,18 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
         public int LongBreakInterval { get; set; }
         public int PeriodCount { get; set; }
         public int Color { get; set; }
-        [JsonIgnore]
-        public DateTime CreateDate { get; set; } = DateTime.UtcNow.AddHours(4);
-        [JsonIgnore]
-        public string UserId { get; set; }
     }
 
     public class CreatePomodoroCommandHandler : IRequestHandler<CreatePomodoroCommand, string>
     {
         private readonly IMapper _mapper;
+        private readonly IUserService userService;
         IUowContext uowContext;
-        public CreatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext)
+        public CreatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
+            this.userService = userService;
         }
         public async Task<string> Handle(CreatePomodoroCommand request, CancellationToken cancellationToken)
         {
@@ -45,6 +43,8 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
                     try
                     {
                         var Pomodoro = _mapper.Map<Pomodoro>(request);
+                        Pomodoro.UserId = userService.GetUserId();
+                        Pomodoro.CreateDate = DateTime.UtcNow.AddHours(4);
                         await uow.PomodoroRepository.AddAsync(Pomodoro);
                         await uow.SaveChangesAsync();
                         uow.Commit();
@@ -61,7 +61,7 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
                 }
 
             }
-            return await Task.FromResult("Pomodoro Created");
+            return await Task.FromResult("Pomodoro Created.");
         }
     }
 }

@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using MyPomodoro.Application.Interfaces.Services;
+using MyPomodoro.WebApi.Services;
 
 namespace MyPomodoro.WebApi.Extensions
 {
     public static class ServiceExtensions
     {
+        public static void AddServiceExtension(this IServiceCollection services)
+        {
+            services.AddTransient<IUserService, UserService>();
+        }
         public static void AddSwaggerExtension(this IServiceCollection services)
         {
             services.AddSwaggerGen(c =>

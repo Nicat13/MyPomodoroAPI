@@ -27,9 +27,11 @@ namespace MyPomodoro.WebApi
                 options.SuppressModelStateInvalidFilter = true;
             });
             services.AddControllers();
+            services.AddHttpContextAccessor();
             services.AddApplicationLayer();
             services.AddPersistenceRegistration(Configuration);
             services.AddPersistenceApiServices(Configuration);
+            services.AddServiceExtension();
             services.AddSwaggerExtension();
         }
 
