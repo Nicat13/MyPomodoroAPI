@@ -10,5 +10,6 @@ namespace MyPomodoro.Application.Interfaces.Repositories
     {
         public Task<IEnumerable<PomodoroViewModel>> GetUserPomodoros(string userId);
         public List<PomodoroColors> GetPomodoroColors();
+        public PomodoroDetailsViewModel GetPomodoroDetails(string userId, int pomodoroId);
     }
 }

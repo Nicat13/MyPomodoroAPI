@@ -86,13 +86,13 @@ namespace MyPomodoro.Infrastructure.Persistence
                             }
                             return Task.CompletedTask;
                         },
-                        OnAuthenticationFailed = c =>
-                        {
-                            c.NoResult();
-                            c.Response.StatusCode = 500;
-                            c.Response.ContentType = "text/plain";
-                            return c.Response.WriteAsync(c.Exception.ToString());
-                        },
+                        // OnAuthenticationFailed = c =>
+                        // {
+                        //     c.NoResult();
+                        //     c.Response.StatusCode = 500;
+                        //     c.Response.ContentType = "text/plain";
+                        //     return c.Response.WriteAsync(c.Exception.ToString());
+                        // },
                         OnChallenge = context =>
                         {
                             context.HandleResponse();

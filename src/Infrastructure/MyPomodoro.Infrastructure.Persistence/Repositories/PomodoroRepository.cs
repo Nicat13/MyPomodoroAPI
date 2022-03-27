@@ -28,9 +28,19 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
             return PomodoroColors.Colors;
         }
 
+        public PomodoroDetailsViewModel GetPomodoroDetails(string userId, int pomodoroId)
+        {
+            string sql = @"SELECT Id,Name, PomodoroTime, ShortBreakTime, LongBreakTime, LongBreakInterval, PeriodCount, Color 
+                         FROM Pomodoros WHERE UserId = @USER_ID AND IsDeleted = 0 AND Id = @POMODORO_ID";
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("USER_ID", userId);
+            parameters.Add("POMODORO_ID", pomodoroId);
+            return dapper.Get<PomodoroDetailsViewModel>(sql, parameters);
+        }
+
         public async Task<IEnumerable<PomodoroViewModel>> GetUserPomodoros(string userId)
         {
-            string sql = "SELECT Name,PomodoroTime,Color FROM Pomodoros WHERE UserId=@USER_ID ORDER by CreateDate DESC";
+            string sql = "SELECT Id,Name,PomodoroTime,Color FROM Pomodoros WHERE UserId=@USER_ID AND IsDeleted=0 ORDER by CreateDate DESC";
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("USER_ID", userId);
             var UserPomodoros = await dapper.GetAllAsync<PomodoroViewModel>(sql, parameters);

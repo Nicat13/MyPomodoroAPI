@@ -4,16 +4,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using MyPomodoro.Application.DTOs.ViewModels;
 using MyPomodoro.Application.Exceptions;
 using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Domain.Entities;
-using Task = System.Threading.Tasks.Task;
 
-namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
+namespace MyPomodoro.Application.Features.Pomodoros.Commands.UpdatePomodoro
 {
-    public partial class CreatePomodoroCommand : IRequest<string>
+    public class UpdatePomodoroCommand : IRequest<PomodoroDetailsViewModel>
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public int PomodoroTime { get; set; }
         public int ShortBreakTime { get; set; }
@@ -22,19 +23,18 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
         public int PeriodCount { get; set; }
         public int Color { get; set; }
     }
-
-    public class CreatePomodoroCommandHandler : IRequestHandler<CreatePomodoroCommand, string>
+    public class UpdatePomodoroCommandHandler : IRequestHandler<UpdatePomodoroCommand, PomodoroDetailsViewModel>
     {
         private readonly IMapper _mapper;
         private readonly IUserService userService;
         IUowContext uowContext;
-        public CreatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService)
+        public UpdatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
             this.userService = userService;
         }
-        public async Task<string> Handle(CreatePomodoroCommand request, CancellationToken cancellationToken)
+        public async Task<PomodoroDetailsViewModel> Handle(UpdatePomodoroCommand request, CancellationToken cancellationToken)
         {
             using (var uow = uowContext.GetUow())
             {
@@ -42,13 +42,17 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
                 {
                     try
                     {
-                        var Pomodoro = _mapper.Map<Pomodoro>(request);
-                        Pomodoro.UserId = userService.GetUserId();
-                        Pomodoro.CreateDate = DateTime.UtcNow.AddHours(4);
-                        await uow.PomodoroRepository.AddAsync(Pomodoro);
+                        var Pomodoro = await uow.PomodoroRepository.GetByIdAsync(request.Id);
+                        string userId = userService.GetUserId();
+                        if (Pomodoro == null || Pomodoro.UserId != userId)
+                        {
+                            throw new HttpStatusException(new List<string> { "Pomodoro not found." });
+                        }
+                        Pomodoro = _mapper.Map<UpdatePomodoroCommand, Pomodoro>(request, Pomodoro);
+                        uow.PomodoroRepository.Update(Pomodoro);
                         await uow.SaveChangesAsync();
                         uow.Commit();
-                        return await Task.FromResult("Pomodoro Created.");
+                        return _mapper.Map<PomodoroDetailsViewModel>(Pomodoro);
                     }
                     catch (Exception ex)
                     {

@@ -5,6 +5,7 @@ namespace MyPomodoro.Application.DTOs.ViewModels
 {
     public class PomodoroViewModel
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public int PomodoroTime { get; set; }
         [JsonIgnore]

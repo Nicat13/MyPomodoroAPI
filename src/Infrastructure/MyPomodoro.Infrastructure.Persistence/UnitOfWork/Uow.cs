@@ -18,6 +18,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
         private IdentityContext _context;
         readonly ITestRepo _testrepo;
         readonly IPomodoroRepository _pomodoroRepository;
+        readonly IUserConfigurationRepository _userConfigurationRepository;
         public Uow(IUowContext connectionContext, IdentityContext context)
         {
             _context = context;
@@ -26,8 +27,10 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             var dapper = new DapperClass(ConnContext);
             _testrepo = new TestRepo(dapper, context);
             _pomodoroRepository = new PomodoroRepository(dapper, context);
+            _userConfigurationRepository = new UserConfigurationRepository(dapper, context);
         }
         public IPomodoroRepository PomodoroRepository => _pomodoroRepository;
+        public IUserConfigurationRepository UserConfigurationRepository => _userConfigurationRepository;
         public ITestRepo TestRepo => _testrepo;
 
         public IUowContext ConnContext { get; set; }
