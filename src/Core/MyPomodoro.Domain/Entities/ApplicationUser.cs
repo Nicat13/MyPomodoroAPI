@@ -11,6 +11,7 @@ namespace MyPomodoro.Domain.Entities
             Tasks = new HashSet<Task>();
             UserConfigurations = new HashSet<UserConfiguration>();
             PomodoroSessions = new HashSet<PomodoroSession>();
+            SessionParticipiants = new HashSet<SessionParticipiant>();
         }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -20,6 +21,8 @@ namespace MyPomodoro.Domain.Entities
         public virtual ICollection<Task> Tasks { get; set; }
         public virtual ICollection<PomodoroSession> PomodoroSessions { get; set; }
         public virtual ICollection<UserConfiguration> UserConfigurations { get; set; }
+        public virtual ICollection<SessionParticipiant> SessionParticipiants { get; set; }
+
     }
 
 }
