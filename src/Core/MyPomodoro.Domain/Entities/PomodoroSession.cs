@@ -12,6 +12,7 @@ namespace MyPomodoro.Domain.Entities
         public PomodoroSession()
         {
             Tasks = new HashSet<Task>();
+            SessionParticipiants = new HashSet<SessionParticipiant>();
         }
         public double TotalPomodoroTime { get; set; }
         public double TotalShortBreakTime { get; set; }
@@ -23,6 +24,7 @@ namespace MyPomodoro.Domain.Entities
         public DateTime? StatusChangeTime { get; set; }
         public string Password { get; set; }
         public string SessionShareCode { get; set; }
+        public PomodoroSessionType SessionType { get; set; }
         public DateTime SessionCreateDate { get; set; }
         public bool IsActive { get; set; }
         public int PomodoroId { get; set; }
@@ -30,5 +32,6 @@ namespace MyPomodoro.Domain.Entities
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
         public virtual ICollection<Task> Tasks { get; set; }
+        public virtual ICollection<SessionParticipiant> SessionParticipiants { get; set; }
     }
 }

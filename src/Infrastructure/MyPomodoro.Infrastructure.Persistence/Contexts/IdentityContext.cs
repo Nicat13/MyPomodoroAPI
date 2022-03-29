@@ -12,6 +12,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Contexts
 
         public DbSet<Pomodoro> Pomodoros { get; set; }
         public DbSet<PomodoroSession> PomodoroSessions { get; set; }
+        public DbSet<SessionParticipiant> SessionParticipiants { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<UserConfiguration> UserConfigurations { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
