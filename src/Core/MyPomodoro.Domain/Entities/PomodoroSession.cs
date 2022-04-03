@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MyPomodoro.Domain.Common;
 using MyPomodoro.Domain.Enums;
@@ -22,6 +23,7 @@ namespace MyPomodoro.Domain.Entities
         public PomodoroStatuses CurrentStatus { get; set; }
         public double? CurrentTime { get; set; }
         public DateTime? StatusChangeTime { get; set; }
+        [MaxLength(15)]
         public string Password { get; set; }
         public string SessionShareCode { get; set; }
         public PomodoroSessionType SessionType { get; set; }

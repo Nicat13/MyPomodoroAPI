@@ -39,6 +39,11 @@ namespace MyPomodoro.Application.Features.Users.Commands.UpdateUserConfiguration
                     try
                     {
                         string userId = userService.GetUserId();
+                        var ActivePomodoroSession = uow.PomodoroSessionRepository.GetActivePomodoroSession(userId);
+                        if (ActivePomodoroSession != null && ActivePomodoroSession.CurrentStatus != 0)
+                        {
+                            throw new HttpStatusException(new List<string> { "Firstly stop session." });
+                        }
                         var UserConfiguration = uow.UserConfigurationRepository.GetUserConfiguration(userId);
                         if (UserConfiguration == null)
                         {

@@ -42,8 +42,13 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.UpdatePomodoro
                 {
                     try
                     {
-                        var Pomodoro = await uow.PomodoroRepository.GetByIdAsync(request.Id);
                         string userId = userService.GetUserId();
+                        var ActivePomodoroSession = uow.PomodoroSessionRepository.GetActivePomodoroSession(userId);
+                        if (ActivePomodoroSession != null)
+                        {
+                            throw new HttpStatusException(new List<string> { "There is already active session." });
+                        }
+                        var Pomodoro = await uow.PomodoroRepository.GetByIdAsync(request.Id);
                         if (Pomodoro == null || Pomodoro.UserId != userId)
                         {
                             throw new HttpStatusException(new List<string> { "Pomodoro not found." });

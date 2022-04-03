@@ -33,8 +33,13 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.DeletePomodoro
                 {
                     try
                     {
-                        var Pomodoro = await uow.PomodoroRepository.GetByIdAsync(request.PomodoroId);
                         string userId = userService.GetUserId();
+                        var ActivePomodoroSession = uow.PomodoroSessionRepository.GetActivePomodoroSession(userId);
+                        if (ActivePomodoroSession != null)
+                        {
+                            throw new HttpStatusException(new List<string> { "There is already active session." });
+                        }
+                        var Pomodoro = await uow.PomodoroRepository.GetByIdAsync(request.PomodoroId);
                         if (Pomodoro == null || Pomodoro.UserId != userId)
                         {
                             throw new HttpStatusException(new List<string> { "Pomodoro not found." });

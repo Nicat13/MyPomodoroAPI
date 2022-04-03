@@ -17,6 +17,7 @@ namespace MyPomodoro.Application.Mapping
             CreateMap<Pomodoro, PomodoroDetailsViewModel>();
             CreateMap<UpdateUserConfigurationCommand, UserConfiguration>();
             CreateMap<UserConfiguration, UserConfigurationViewModel>();
+            CreateMap<PomodoroDetailsViewModel, PomodoroSessionDetailsViewModel>();
 
         }
     }
