@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyPomodoro.Application;
+using MyPomodoro.Application.Hubs;
 using MyPomodoro.Infrastructure.Persistence;
 using MyPomodoro.WebApi.Extensions;
 
@@ -47,10 +48,18 @@ namespace MyPomodoro.WebApi
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+            });
             app.UseErrorHandling();
             app.UseSwaggerExtension();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<SessionHub>("/sessionhub");
                 endpoints.MapControllers();
             });
         }

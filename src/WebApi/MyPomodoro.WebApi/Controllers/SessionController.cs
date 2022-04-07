@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSession;
+using MyPomodoro.Application.Features.PomodoroSessions.Commands.EndSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetActiveSession;
 
 namespace MyPomodoro.WebApi.Controllers
@@ -23,6 +24,12 @@ namespace MyPomodoro.WebApi.Controllers
         public async Task<IActionResult> ActiveSession()
         {
             return Ok(await Mediator.Send(new GetActiveSessionQuery()));
+        }
+        [HttpPut("[action]")]
+        [Authorize]
+        public async Task<IActionResult> EndSession([FromBody] EndSessionCommand command)
+        {
+            return Ok(await Mediator.Send(command));
         }
     }
 }

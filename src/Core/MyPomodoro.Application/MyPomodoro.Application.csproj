@@ -1,28 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="FluentValidation" Version="10.3.3" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
-    <PackageReference Include="MediatR" Version="9.0.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="10.1.1"/>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1"/>
+    <PackageReference Include="FluentValidation" Version="10.3.3"/>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3"/>
+    <PackageReference Include="MediatR" Version="9.0.0"/>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0"/>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\MyPomodoro.Domain\MyPomodoro.Domain.csproj" />
+    <ProjectReference Include="..\MyPomodoro.Domain\MyPomodoro.Domain.csproj"/>
   </ItemGroup>
-
   <ItemGroup>
-    <Folder Include="Interfaces\Repositories\" />
-    <Folder Include="Features\" />
-    <Folder Include="Behaviours\" />
-    <Folder Include="Mappers\" />
-    <Folder Include="Exceptions\" />
+    <Folder Include="Interfaces\Repositories\"/>
+    <Folder Include="Features\"/>
+    <Folder Include="Behaviours\"/>
+    <Folder Include="Mappers\"/>
+    <Folder Include="Exceptions\"/>
   </ItemGroup>
-
 </Project>

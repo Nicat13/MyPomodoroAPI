@@ -1,13 +1,10 @@
 using System;
-using System.Text.Json.Serialization;
 using MyPomodoro.Domain.Enums;
 
 namespace MyPomodoro.Application.DTOs.ViewModels
 {
-    public class PomodoroSessionDetailsViewModel
+    public class JoinedPomodoroSessionDetailsViewModel
     {
-        [JsonIgnore]
-        public int Id { get; set; }
         public string Name { get; set; }
         public int PomodoroTime { get; set; }
         public int ShortBreakTime { get; set; }
@@ -18,6 +15,5 @@ namespace MyPomodoro.Application.DTOs.ViewModels
         public string SessionShareCode { get; set; }
         public PomodoroStatuses CurrentStatus { get; set; }
         public PomodoroSteps CurrentStep { get; set; }
-        public UserConfigurationViewModel UserConfiguration { get; set; }
     }
 }

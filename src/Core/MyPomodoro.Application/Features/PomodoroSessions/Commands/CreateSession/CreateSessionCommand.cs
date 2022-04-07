@@ -41,7 +41,8 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                     {
                         var UserId = userService.GetUserId();
                         var ActivePomodoroSession = uow.PomodoroSessionRepository.GetActivePomodoroSession(UserId);
-                        if (ActivePomodoroSession != null)
+                        var JoinedActiveSession = uow.PomodoroSessionRepository.GetJoinedActivePomodoroSession(UserId);
+                        if (ActivePomodoroSession != null || JoinedActiveSession != null)
                         {
                             throw new HttpStatusException(new List<string> { "There is already active session." });
                         }
@@ -68,6 +69,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                             UserId = UserId
                         };
                         var result = _mapper.Map<PomodoroSessionDetailsViewModel>(Pomodoro);
+                        result.CurrentStep = NewSession.CurrentStep;
+                        result.CurrentStatus = NewSession.CurrentStatus;
+                        result.SessionShareCode = NewSession.SessionShareCode;
+                        result.CurrentTime = NewSession.CurrentTime;
                         result.UserConfiguration = _mapper.Map<UserConfigurationViewModel>(uow.UserConfigurationRepository.GetUserConfiguration(UserId));
                         await uow.PomodoroSessionRepository.AddAsync(NewSession);
                         await uow.SaveChangesAsync();
