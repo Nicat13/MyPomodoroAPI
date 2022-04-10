@@ -4,8 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using MyPomodoro.Application.DTOs.ViewModels;
 using MyPomodoro.Application.Exceptions;
+using MyPomodoro.Application.Hubs;
 using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Domain.Entities;
@@ -18,18 +20,24 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
     {
         public int PomodoroId { get; set; }
         public string Password { get; set; }
+        public string ConnectionId { get; set; }
         public PomodoroSessionType SessionType { get; set; }
     }
     public class CreateSessionCommandHandler : IRequestHandler<CreateSessionCommand, PomodoroSessionDetailsViewModel>
     {
         private readonly IMapper _mapper;
         private readonly IUserService userService;
+        private readonly IHubContext<SessionHub> _sessionHub;
+        private readonly ICryptoService _cryptoService;
+
         IUowContext uowContext;
-        public CreateSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService)
+        public CreateSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IHubContext<SessionHub> sessionHub, ICryptoService cryptoService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
             this.userService = userService;
+            _sessionHub = sessionHub;
+            _cryptoService = cryptoService;
         }
         public async Task<PomodoroSessionDetailsViewModel> Handle(CreateSessionCommand request, CancellationToken cancellationToken)
         {
@@ -51,6 +59,14 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                         {
                             throw new HttpStatusException(new List<string> { "Pomodoro not found." });
                         }
+                        if (String.IsNullOrEmpty(request.Password.Trim()))
+                        {
+                            request.Password = null;
+                        }
+                        else
+                        {
+                            request.Password = _cryptoService.HashPassword(request.Password.Trim());
+                        }
                         PomodoroSession NewSession = new PomodoroSession()
                         {
                             IsActive = true,
@@ -61,13 +77,17 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                             CurrentStep = 0,
                             CurrentStatus = 0,
                             CurrentTime = Pomodoro.PomodoroTime,
-                            Password = String.IsNullOrEmpty(request.Password.Trim()) == true ? null : request.Password.Trim(),
+                            Password = request.Password,
                             SessionShareCode = Guid.NewGuid().ToString(),
                             SessionType = request.SessionType,
                             SessionCreateDate = DateTime.UtcNow.AddHours(4),
                             PomodoroId = Pomodoro.Id,
                             UserId = UserId
                         };
+                        if (!String.IsNullOrEmpty(request.ConnectionId))
+                        {
+                            await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, NewSession.SessionShareCode);
+                        }
                         var result = _mapper.Map<PomodoroSessionDetailsViewModel>(Pomodoro);
                         result.CurrentStep = NewSession.CurrentStep;
                         result.CurrentStatus = NewSession.CurrentStatus;

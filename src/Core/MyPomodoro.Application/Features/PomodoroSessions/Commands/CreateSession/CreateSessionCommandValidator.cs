@@ -21,6 +21,19 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                 RuleFor(p => p.Password)
                     .MaximumLength(15).WithMessage("{PropertyName} must not exceed 15 characters.");
             });
+
+            When(p => p.SessionType == 0, () =>
+            {
+                RuleFor(p => p.ConnectionId)
+                    .Empty();
+            }).Otherwise(() =>
+            {
+                RuleFor(p => p.ConnectionId)
+                    .NotNull()
+                    .NotEmpty()
+                    .MaximumLength(30).WithMessage("{PropertyName} must not exceed 30 characters.");
+            });
+
             RuleFor(p => p.SessionType)
                     .NotNull()
                     .WithMessage("{PropertyName} is required.")

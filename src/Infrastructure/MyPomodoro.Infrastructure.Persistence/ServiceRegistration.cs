@@ -43,6 +43,7 @@ namespace MyPomodoro.Infrastructure.Persistence
             services.Configure<APIAppSettings>(configuration.GetSection("APIAppSettings"));
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ICryptoService, CryptoService>();
             services.AddScoped<IDateTimeService, DateTimeService>();
             services.AddScoped<IDapper, DapperClass>();
             services.AddScoped<IUowContext, UnitOfWorkContext>();
