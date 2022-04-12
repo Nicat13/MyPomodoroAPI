@@ -39,7 +39,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
                             LEFT JOIN Pomodoros P ON P.Id=PS.PomodoroId
                             WHERE PS.Id=(SELECT TOP 1 SessionId
                             FROM SessionParticipiants
-                            WHERE UserId=@USER_ID
+                            WHERE UserId=@USER_ID AND IsJoined=1
                             ORDER BY Id DESC) AND PS.IsActive=1 AND P.IsDeleted=0";
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("USER_ID", userId);
@@ -55,16 +55,29 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
                             LEFT JOIN Pomodoros P ON P.Id=PS.PomodoroId
                             WHERE PS.Id=(SELECT TOP 1 SessionId
                             FROM SessionParticipiants
-                            WHERE UserId=@USER_ID
+                            WHERE UserId=@USER_ID AND IsJoined=1
                             ORDER BY Id DESC) AND PS.IsActive=1 AND P.IsDeleted=0";
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("USER_ID", userId);
             return dapper.Get<JoinedPomodoroSessionDetailsViewModel>(sql, parameters);
         }
 
+        public LatestJoinedSessionViewModel GetLatestJoinedSession(string userId)
+        {
+            string sql = @" SELECT TOP 1 SP.Id,SP.SessionId,SP.IsJoined
+                            FROM SessionParticipiants SP
+                            LEFT JOIN PomodoroSessions PS ON SP.SessionId=PS.Id
+                            LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                            WHERE SP.UserId=@USER_ID AND PS.IsActive=1 AND P.IsDeleted=0
+                            ORDER BY Id DESC";
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("USER_ID", userId);
+            return dapper.Get<LatestJoinedSessionViewModel>(sql, parameters);
+        }
+
         public async Task<PomodoroSession> GetSessionBySessionShareCode(string sessionShareCode)
         {
-            return await _context.PomodoroSessions.FirstOrDefaultAsync(x => x.SessionShareCode == sessionShareCode);
+            return await _context.PomodoroSessions.FirstOrDefaultAsync(x => x.SessionShareCode == sessionShareCode && x.IsActive == true);
         }
     }
 }

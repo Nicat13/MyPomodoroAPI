@@ -28,14 +28,16 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession
         private readonly IUserService userService;
         private readonly ICryptoService cryptoService;
         private readonly IHubContext<SessionHub> _sessionHub;
+        private readonly IDateTimeService _dateTimeService;
         IUowContext uowContext;
-        public JoinSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IHubContext<SessionHub> sessionHub, ICryptoService cryptoService)
+        public JoinSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IHubContext<SessionHub> sessionHub, ICryptoService cryptoService, IDateTimeService dateTimeService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
             this.userService = userService;
             _sessionHub = sessionHub;
             this.cryptoService = cryptoService;
+            _dateTimeService = dateTimeService;
         }
         public async Task<JoinedPomodoroSessionDetailsViewModel> Handle(JoinSessionCommand request, CancellationToken cancellationToken)
         {
@@ -47,8 +49,8 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession
                     {
                         var UserId = userService.GetUserId();
                         var ActiveSession = uow.PomodoroSessionRepository.GetActivePomodoroSession(UserId);
-                        var JoinedActiveSession = uow.PomodoroSessionRepository.GetJoinedActivePomodoroSession(UserId);
-                        if (ActiveSession != null || JoinedActiveSession != null)
+                        var LatestJoinedSession = uow.PomodoroSessionRepository.GetLatestJoinedSession(UserId);
+                        if (ActiveSession != null || (LatestJoinedSession != null && LatestJoinedSession.IsJoined == true))
                         {
                             throw new HttpStatusException(new List<string> { "There is already active session." });
                         }
@@ -62,16 +64,32 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession
                         {
                             throw new HttpStatusException(new List<string> { "Invalid Password." });
                         }
-                        await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, sessionModel.SessionShareCode);
-                        SessionParticipiant participiant = new SessionParticipiant()
+                        if (LatestJoinedSession != null && sessionModel.Id == LatestJoinedSession.SessionId)
                         {
-                            JoinDate = DateTime.UtcNow.AddHours(4),
-                            UserId = UserId,
-                            SessionId = sessionModel.Id
-                        };
-                        await uow.SessionParticipiantRepository.AddAsync(participiant);
+                            var lastsessionparticipiant = await uow.SessionParticipiantRepository.GetByIdAsync(LatestJoinedSession.Id);
+                            lastsessionparticipiant.IsJoined = true;
+                            uow.SessionParticipiantRepository.Update(lastsessionparticipiant);
+                        }
+                        else
+                        {
+                            SessionParticipiant participiant = new SessionParticipiant()
+                            {
+                                JoinDate = _dateTimeService.NowUtc,
+                                UserId = UserId,
+                                SessionId = sessionModel.Id,
+                                IsJoined = true
+                            };
+                            await uow.SessionParticipiantRepository.AddAsync(participiant);
+                        }
                         await uow.SaveChangesAsync();
                         uow.Commit();
+                        var userEmail = userService.GetUserEmail();
+                        await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, sessionModel.SessionShareCode);
+                        await _sessionHub.Clients.GroupExcept(sessionModel.SessionShareCode, request.ConnectionId)
+                                .SendAsync("ReceiveLatestJoined", new
+                                {
+                                    UserName = userEmail
+                                });
                         return await Task.FromResult(uow.PomodoroSessionRepository.GetJoinedActivePomodoroSessionDetails(UserId));
                     }
                     catch (Exception ex)

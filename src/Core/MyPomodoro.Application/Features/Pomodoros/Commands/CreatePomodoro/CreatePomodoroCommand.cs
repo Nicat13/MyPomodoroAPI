@@ -27,12 +27,14 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
     {
         private readonly IMapper _mapper;
         private readonly IUserService userService;
+        private readonly IDateTimeService _dateTimeService;
         IUowContext uowContext;
-        public CreatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService)
+        public CreatePomodoroCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IDateTimeService dateTimeService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
             this.userService = userService;
+            _dateTimeService = dateTimeService;
         }
         public async Task<string> Handle(CreatePomodoroCommand request, CancellationToken cancellationToken)
         {
@@ -44,7 +46,7 @@ namespace MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro
                     {
                         var Pomodoro = _mapper.Map<Pomodoro>(request);
                         Pomodoro.UserId = userService.GetUserId();
-                        Pomodoro.CreateDate = DateTime.UtcNow.AddHours(4);
+                        Pomodoro.CreateDate = _dateTimeService.NowUtc;
                         await uow.PomodoroRepository.AddAsync(Pomodoro);
                         await uow.SaveChangesAsync();
                         uow.Commit();

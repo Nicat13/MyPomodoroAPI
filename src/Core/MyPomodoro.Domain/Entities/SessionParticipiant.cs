@@ -8,6 +8,7 @@ namespace MyPomodoro.Domain.Entities
     public class SessionParticipiant : BaseEntity
     {
         public DateTime JoinDate { get; set; }
+        public bool IsJoined { get; set; }
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
         public int SessionId { get; set; }

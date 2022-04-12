@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.EndSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession;
+using MyPomodoro.Application.Features.PomodoroSessions.Commands.LeaveSession;
+using MyPomodoro.Application.Features.PomodoroSessions.Commands.SessionAction;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetActiveSession;
 
 namespace MyPomodoro.WebApi.Controllers
@@ -35,6 +37,18 @@ namespace MyPomodoro.WebApi.Controllers
         [HttpPost("[action]")]
         [Authorize]
         public async Task<IActionResult> JoinSession([FromBody] JoinSessionCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+        [HttpPost("[action]")]
+        [Authorize]
+        public async Task<IActionResult> LeaveSession([FromBody] LeaveSessionCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+        [HttpPut("[action]")]
+        [Authorize]
+        public async Task<IActionResult> SessionAction([FromBody] SessionActionCommand command)
         {
             return Ok(await Mediator.Send(command));
         }

@@ -29,15 +29,16 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
         private readonly IUserService userService;
         private readonly IHubContext<SessionHub> _sessionHub;
         private readonly ICryptoService _cryptoService;
-
+        private readonly IDateTimeService _dateTimeService;
         IUowContext uowContext;
-        public CreateSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IHubContext<SessionHub> sessionHub, ICryptoService cryptoService)
+        public CreateSessionCommandHandler(IMapper mapper, IUowContext uowContext, IUserService userService, IHubContext<SessionHub> sessionHub, ICryptoService cryptoService, IDateTimeService dateTimeService)
         {
             _mapper = mapper;
             this.uowContext = uowContext;
             this.userService = userService;
             _sessionHub = sessionHub;
             _cryptoService = cryptoService;
+            _dateTimeService = dateTimeService;
         }
         public async Task<PomodoroSessionDetailsViewModel> Handle(CreateSessionCommand request, CancellationToken cancellationToken)
         {
@@ -80,14 +81,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                             Password = request.Password,
                             SessionShareCode = Guid.NewGuid().ToString(),
                             SessionType = request.SessionType,
-                            SessionCreateDate = DateTime.UtcNow.AddHours(4),
+                            SessionCreateDate = _dateTimeService.NowUtc,
                             PomodoroId = Pomodoro.Id,
                             UserId = UserId
                         };
-                        if (!String.IsNullOrEmpty(request.ConnectionId))
-                        {
-                            await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, NewSession.SessionShareCode);
-                        }
                         var result = _mapper.Map<PomodoroSessionDetailsViewModel>(Pomodoro);
                         result.CurrentStep = NewSession.CurrentStep;
                         result.CurrentStatus = NewSession.CurrentStatus;
@@ -97,6 +94,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.CreateSessio
                         await uow.PomodoroSessionRepository.AddAsync(NewSession);
                         await uow.SaveChangesAsync();
                         uow.Commit();
+                        if (!String.IsNullOrEmpty(request.ConnectionId))
+                        {
+                            await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, NewSession.SessionShareCode);
+                        }
                         return await Task.FromResult(result);
                     }
                     catch (Exception ex)

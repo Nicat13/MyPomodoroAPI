@@ -11,5 +11,6 @@ namespace MyPomodoro.Application.Interfaces.Repositories
         public JoinedPomodoroSessionDetailsViewModel GetJoinedActivePomodoroSessionDetails(string userId);
         public JoinedPomodoroSessionViewModel GetJoinedActivePomodoroSession(string userId);
         public Task<PomodoroSession> GetSessionBySessionShareCode(string sessionShareCode);
+        public LatestJoinedSessionViewModel GetLatestJoinedSession(string userId);
     }
 }
