@@ -8,6 +8,8 @@ using MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.LeaveSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Commands.SessionAction;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetActiveSession;
+using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetJoinedSession;
+using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetJoinedSessionDetails;
 
 namespace MyPomodoro.WebApi.Controllers
 {
@@ -27,6 +29,18 @@ namespace MyPomodoro.WebApi.Controllers
         public async Task<IActionResult> ActiveSession()
         {
             return Ok(await Mediator.Send(new GetActiveSessionQuery()));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> JoinedSession()
+        {
+            return Ok(await Mediator.Send(new GetJoinedSessionQuery()));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> JoinedSessionDetails()
+        {
+            return Ok(await Mediator.Send(new GetJoinedSessionDetailsQuery()));
         }
         [HttpPut("[action]")]
         [Authorize]

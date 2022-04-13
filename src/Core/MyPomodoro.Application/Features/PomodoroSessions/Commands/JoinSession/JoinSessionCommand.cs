@@ -64,6 +64,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession
                         {
                             throw new HttpStatusException(new List<string> { "Invalid Password." });
                         }
+                        if (sessionModel.CurrentStatus != PomodoroStatuses.Stop)
+                        {
+                            throw new HttpStatusException(new List<string> { "Session already started." });
+                        }
                         if (LatestJoinedSession != null && sessionModel.Id == LatestJoinedSession.SessionId)
                         {
                             var lastsessionparticipiant = await uow.SessionParticipiantRepository.GetByIdAsync(LatestJoinedSession.Id);
