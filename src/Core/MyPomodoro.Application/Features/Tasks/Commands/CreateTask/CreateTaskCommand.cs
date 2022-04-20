@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AutoMapper;
 using MediatR;
+using MyPomodoro.Application.DTOs.ViewModels;
 using MyPomodoro.Application.Exceptions;
 using MyPomodoro.Application.Interfaces.Services;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
@@ -11,13 +12,13 @@ using ThreadTask = System.Threading.Tasks;
 
 namespace MyPomodoro.Application.Features.Tasks.Commands.CreateTask
 {
-    public class CreateTaskCommand : IRequest<string>
+    public class CreateTaskCommand : IRequest<CreatedTaskViewModel>
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public int EstimatePomodoros { get; set; }
     }
-    public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, string>
+    public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, CreatedTaskViewModel>
     {
         private readonly IMapper _mapper;
         private readonly IUserService userService;
@@ -30,7 +31,7 @@ namespace MyPomodoro.Application.Features.Tasks.Commands.CreateTask
             this.userService = userService;
             _dateTimeService = dateTimeService;
         }
-        public async ThreadTask.Task<string> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+        public async ThreadTask.Task<CreatedTaskViewModel> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
             using (var uow = uowContext.GetUow())
             {
@@ -53,7 +54,7 @@ namespace MyPomodoro.Application.Features.Tasks.Commands.CreateTask
                         await uow.TaskRepository.AddAsync(task);
                         await uow.SaveChangesAsync();
                         uow.Commit();
-                        return await ThreadTask.Task.FromResult("Task Created.");
+                        return await ThreadTask.Task.FromResult(_mapper.Map<CreatedTaskViewModel>(task));
                     }
                     catch (Exception ex)
                     {

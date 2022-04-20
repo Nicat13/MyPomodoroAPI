@@ -20,7 +20,7 @@ namespace MyPomodoro.Application.Mapping
             CreateMap<UserConfiguration, UserConfigurationViewModel>();
             CreateMap<PomodoroDetailsViewModel, PomodoroSessionDetailsViewModel>();
             CreateMap<CreateTaskCommand, Task>();
-
+            CreateMap<Task, CreatedTaskViewModel>();
         }
     }
 }
