@@ -13,6 +13,7 @@ namespace MyPomodoro.Application.Interfaces.UnitOfWork
         IUserConfigurationRepository UserConfigurationRepository { get; }
         IPomodoroSessionRepository PomodoroSessionRepository { get; }
         ISessionParticipiantRepository SessionParticipiantRepository { get; }
+        ITaskRepository TaskRepository { get; }
         IDbContextTransaction BeginTransaction();
         void Commit();
         void RollBack();

@@ -24,7 +24,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
 
         public PomodoroSessionDetailsViewModel GetActivePomodoroSession(string userId)
         {
-            string sql = @"SELECT PS.Id,P.Name,P.PomodoroTime,P.LongBreakTime,P.ShortBreakTime,P.LongBreakInterval,P.PeriodCount, PS.CurrentStatus, PS.CurrentStep, PS.SessionShareCode, PS.CurrentTime FROM PomodoroSessions PS
+            string sql = @"SELECT PS.Id,P.Name,P.PomodoroTime,P.LongBreakTime,P.ShortBreakTime,P.LongBreakInterval,P.PeriodCount, PS.CurrentStatus, PS.CurrentStep, PS.SessionShareCode, PS.CurrentTime, PS.StatusChangeTime FROM PomodoroSessions PS
                             LEFT JOIN Pomodoros P ON PS.PomodoroId = P.Id
                             WHERE PS.UserId = @USER_ID AND PS.IsActive = 1 AND P.IsDeleted = 0";
             DynamicParameters parameters = new DynamicParameters();
@@ -34,7 +34,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
 
         public JoinedPomodoroSessionViewModel GetJoinedActivePomodoroSession(string userId)
         {
-            string sql = @"SELECT PS.SessionShareCode, U.FirstName as UserName, P.Name as PomodoroName FROM PomodoroSessions PS
+            string sql = @"SELECT PS.Id ,PS.SessionShareCode, U.UserName as UserName, P.Name as PomodoroName FROM PomodoroSessions PS
                             LEFT JOIN Users U ON PS.UserId=U.Id
                             LEFT JOIN Pomodoros P ON P.Id=PS.PomodoroId
                             WHERE PS.Id=(SELECT TOP 1 SessionId
@@ -48,8 +48,8 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
 
         public JoinedPomodoroSessionDetailsViewModel GetJoinedActivePomodoroSessionDetails(string userId)
         {
-            string sql = @"SELECT PS.SessionShareCode, U.FirstName as UserName, P.Name as PomodoroName, P.PomodoroTime,
-                            P.ShortBreakTime,P.LongBreakTime,P.LongBreakInterval,P.PeriodCount,PS.CurrentTime,PS.CurrentStatus,PS.CurrentStep
+            string sql = @"SELECT PS.SessionShareCode, U.UserName as UserName, P.Name as PomodoroName, P.PomodoroTime,
+                            P.ShortBreakTime,P.LongBreakTime,P.LongBreakInterval,P.PeriodCount,PS.CurrentTime,PS.CurrentStatus,PS.CurrentStep, PS.StatusChangeTime
                             FROM PomodoroSessions PS
                             LEFT JOIN Users U ON PS.UserId=U.Id
                             LEFT JOIN Pomodoros P ON P.Id=PS.PomodoroId

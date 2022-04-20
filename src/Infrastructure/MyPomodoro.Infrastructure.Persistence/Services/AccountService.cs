@@ -53,7 +53,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Services
                 Email = request.Email,
                 FirstName = request.Name,
                 LastName = request.Surname,
-                UserName = request.Email
+                UserName = request.UserName
             };
             var result = await _userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
@@ -122,6 +122,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Services
             AuthenticationResponse response = new AuthenticationResponse();
             response.Jwt = await GenerateJWToken(user);
             response.Email = user.Email;
+            response.UserName = user.UserName;
             response.Name = user.FirstName;
             if (user.RefreshToken == null || user.RefreshToken.IsExpired)
             {

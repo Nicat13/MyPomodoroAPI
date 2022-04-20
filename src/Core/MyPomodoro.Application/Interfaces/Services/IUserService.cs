@@ -7,5 +7,6 @@ namespace MyPomodoro.Application.Interfaces.Services
         ClaimsPrincipal GetUser();
         public string GetUserId();
         public string GetUserEmail();
+        public string GetUserName();
     }
 }

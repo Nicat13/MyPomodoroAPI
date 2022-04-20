@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using MyPomodoro.Domain.Entities;
 
 namespace MyPomodoro.Infrastructure.Persistence.Contexts
@@ -54,6 +55,11 @@ namespace MyPomodoro.Infrastructure.Persistence.Contexts
             {
                 entity.ToTable("UserTokens");
             });
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS));
         }
     }
 }

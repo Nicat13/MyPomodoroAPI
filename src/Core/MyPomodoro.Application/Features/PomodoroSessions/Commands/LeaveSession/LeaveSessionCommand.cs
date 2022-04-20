@@ -49,11 +49,11 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.LeaveSession
                         await uow.SaveChangesAsync();
                         var pomodorosession = await uow.PomodoroSessionRepository.GetByIdAsync(LatestJoinedSession.SessionId);
                         uow.Commit();
-                        var userEmail = userService.GetUserEmail();
+                        var userName = userService.GetUserName();
                         await _sessionHub.Clients.GroupExcept(pomodorosession.SessionShareCode, request.ConnectionId)
                                 .SendAsync("ReceiveLatestLeft", new
                                 {
-                                    UserName = userEmail
+                                    UserName = userName
                                 });
                         await _sessionHub.Groups.RemoveFromGroupAsync(request.ConnectionId, pomodorosession.SessionShareCode);
                         return await Task.FromResult("Left successfully.");

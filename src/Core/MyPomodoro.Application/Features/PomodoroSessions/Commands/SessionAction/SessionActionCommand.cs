@@ -61,7 +61,21 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.SessionActio
                                 var CurrentTime = pomodorosession.CurrentTime - (statuschangetime.Subtract((DateTime)pomodorosession.StatusChangeTime).TotalMinutes);
                                 pomodorosession.CurrentTime = CurrentTime < 0 ? 0 : CurrentTime;
                             }
+                            var UsedPomodoro = await uow.PomodoroRepository.GetByIdAsync(pomodorosession.PomodoroId);
+                            switch (pomodorosession.CurrentStep)
+                            {
+                                case PomodoroSteps.Pomodoro:
+                                    pomodorosession.TotalPomodoroTime = UsedPomodoro.PomodoroTime - Convert.ToDouble(String.Format("{0:0.00}", pomodorosession.CurrentTime));
+                                    break;
+                                case PomodoroSteps.ShortBreak:
+                                    pomodorosession.TotalShortBreakTime = UsedPomodoro.ShortBreakTime - Convert.ToDouble(String.Format("{0:0.00}", pomodorosession.CurrentTime));
+                                    break;
+                                case PomodoroSteps.LongBreak:
+                                    pomodorosession.TotalLongBreakTime = UsedPomodoro.LongBreakTime - Convert.ToDouble(String.Format("{0:0.00}", pomodorosession.CurrentTime));
+                                    break;
+                            }
                         }
+
                         pomodorosession.StatusChangeTime = statuschangetime;
                         uow.PomodoroSessionRepository.Update(pomodorosession);
                         await uow.SaveChangesAsync();

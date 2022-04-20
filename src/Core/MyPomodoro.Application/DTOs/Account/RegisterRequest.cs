@@ -13,7 +13,9 @@ namespace MyPomodoro.Application.DTOs.Account
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-
+        [Required]
+        [MaxLength(15)]
+        public string UserName { get; set; }
 
         [Required]
         [MinLength(6)]

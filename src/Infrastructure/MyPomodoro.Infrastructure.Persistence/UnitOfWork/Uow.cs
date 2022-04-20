@@ -21,6 +21,7 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
         readonly IUserConfigurationRepository _userConfigurationRepository;
         readonly IPomodoroSessionRepository _pomodoroSessionRepository;
         readonly ISessionParticipiantRepository _sessionParticipiantRepository;
+        readonly ITaskRepository _taskRepository;
         public Uow(IUowContext connectionContext, IdentityContext context)
         {
             _context = context;
@@ -32,11 +33,13 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             _userConfigurationRepository = new UserConfigurationRepository(dapper, context);
             _pomodoroSessionRepository = new PomodoroSessionRepository(dapper, context);
             _sessionParticipiantRepository = new SessionParticipiantRepository(dapper, context);
+            _taskRepository = new TaskRepository(dapper, context);
         }
         public IPomodoroRepository PomodoroRepository => _pomodoroRepository;
         public IUserConfigurationRepository UserConfigurationRepository => _userConfigurationRepository;
         public IPomodoroSessionRepository PomodoroSessionRepository => _pomodoroSessionRepository;
         public ISessionParticipiantRepository SessionParticipiantRepository => _sessionParticipiantRepository;
+        public ITaskRepository TaskRepository => _taskRepository;
         public ITestRepo TestRepo => _testrepo;
 
         public IUowContext ConnContext { get; set; }

@@ -37,6 +37,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Queries.GetJoinedSess
                     {
                         throw new HttpStatusException(new List<string> { "There is no joined session." });
                     }
+                    var OriginalSession = await uow.PomodoroSessionRepository.GetSessionBySessionShareCode(JoinedPomodoroSession.SessionShareCode);
+                    var sessionAuthorSettings = uow.UserConfigurationRepository.GetUserConfiguration(OriginalSession.UserId);
+                    JoinedPomodoroSession.AutoStartPomodoro = sessionAuthorSettings.AutoStartPomodoros;
+                    JoinedPomodoroSession.AutoStartBreaks = sessionAuthorSettings.AutoStartBreaks;
                     return await Task.FromResult(JoinedPomodoroSession);
                 }
                 catch (Exception ex)

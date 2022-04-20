@@ -87,14 +87,18 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.JoinSession
                         }
                         await uow.SaveChangesAsync();
                         uow.Commit();
-                        var userEmail = userService.GetUserEmail();
+                        var userName = userService.GetUserName();
                         await _sessionHub.Groups.AddToGroupAsync(request.ConnectionId, sessionModel.SessionShareCode);
                         await _sessionHub.Clients.GroupExcept(sessionModel.SessionShareCode, request.ConnectionId)
                                 .SendAsync("ReceiveLatestJoined", new
                                 {
-                                    UserName = userEmail
+                                    UserName = userName
                                 });
-                        return await Task.FromResult(uow.PomodoroSessionRepository.GetJoinedActivePomodoroSessionDetails(UserId));
+                        var result = await Task.FromResult(uow.PomodoroSessionRepository.GetJoinedActivePomodoroSessionDetails(UserId));
+                        var sessionAuthorSettings = uow.UserConfigurationRepository.GetUserConfiguration(sessionModel.UserId);
+                        result.AutoStartPomodoro = sessionAuthorSettings.AutoStartPomodoros;
+                        result.AutoStartBreaks = sessionAuthorSettings.AutoStartBreaks;
+                        return result;
                     }
                     catch (Exception ex)
                     {

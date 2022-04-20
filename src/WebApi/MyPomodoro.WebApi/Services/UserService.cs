@@ -26,6 +26,10 @@ namespace MyPomodoro.WebApi.Services
         {
             return accessor?.HttpContext?.User.FindFirstValue(ClaimTypes.Email);
         }
+        public string GetUserName()
+        {
+            return accessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
 
     }
 }
