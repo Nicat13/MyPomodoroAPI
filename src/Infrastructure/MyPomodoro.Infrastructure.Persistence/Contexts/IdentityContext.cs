@@ -17,6 +17,7 @@ namespace MyPomodoro.Infrastructure.Persistence.Contexts
         public DbSet<Task> Tasks { get; set; }
         public DbSet<UserConfiguration> UserConfigurations { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<WebPushSubscription> WebPushSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

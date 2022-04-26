@@ -11,35 +11,35 @@ namespace MyPomodoro.WebApi.Controllers
     [ApiController]
     public class TestController : BaseController
     {
-        [HttpPost]
-        public async Task<IActionResult> post(testdto command)
-        {
-            return Ok(await Mediator.Send(command));
-        }
-        [HttpGet("[action]")]
-        public IActionResult Salam([FromQuery] testgetmodel model)
-        {
-            return Ok(model);
-        }
-        [HttpPost("[action]")]
-        [Authorize]
-        public IActionResult AuthTest()
-        {
-            var id = User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            return Ok(id);
-        }
-        [HttpGet("[action]")]
-        public IActionResult GetIP()
-        {
-            return Ok(GenerateIPAddress());
-        }
-        private string GenerateIPAddress()
-        {
-            if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"];
-            else
-                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-        }
+        // [HttpPost]
+        // public async Task<IActionResult> post(testdto command)
+        // {
+        //     return Ok(await Mediator.Send(command));
+        // }
+        // [HttpGet("[action]")]
+        // public IActionResult Salam([FromQuery] testgetmodel model)
+        // {
+        //     return Ok(model);
+        // }
+        // [HttpPost("[action]")]
+        // [Authorize]
+        // public IActionResult AuthTest()
+        // {
+        //     var id = User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+        //     return Ok(id);
+        // }
+        // [HttpGet("[action]")]
+        // public IActionResult GetIP()
+        // {
+        //     return Ok(GenerateIPAddress());
+        // }
+        // private string GenerateIPAddress()
+        // {
+        //     if (Request.Headers.ContainsKey("X-Forwarded-For"))
+        //         return Request.Headers["X-Forwarded-For"];
+        //     else
+        //         return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        // }
     }
 
     public class testgetmodel

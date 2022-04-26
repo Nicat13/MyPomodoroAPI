@@ -8,6 +8,7 @@ using MyPomodoro.Domain.Entities;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 using MyPomodoro.Infrastructure.Persistence.Dapper;
 using ThreadTasks = System.Threading.Tasks;
+
 namespace MyPomodoro.Infrastructure.Persistence.Repositories
 {
     public class TaskRepository : GenericRepository<Task>, ITaskRepository

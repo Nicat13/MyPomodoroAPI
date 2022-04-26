@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyPomodoro.Application.Features.Tasks.Commands.CreateTask;
 using MyPomodoro.Application.Features.Tasks.Commands.DeleteTask;
+using MyPomodoro.Application.Features.Tasks.Commands.DoneTask;
+using MyPomodoro.Application.Features.Tasks.Commands.UpdateTask;
 using MyPomodoro.Application.Features.Tasks.Queries.GetActiveSessionTasks;
 
 namespace MyPomodoro.WebApi.Controllers
@@ -27,6 +29,18 @@ namespace MyPomodoro.WebApi.Controllers
         [HttpDelete("[action]")]
         [Authorize]
         public async Task<IActionResult> DeleteTask([FromBody] DeleteTaskCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+        [HttpPut("[action]")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+        [HttpPut("[action]")]
+        [Authorize]
+        public async Task<IActionResult> DoneAction([FromBody] DoneTaskCommand command)
         {
             return Ok(await Mediator.Send(command));
         }

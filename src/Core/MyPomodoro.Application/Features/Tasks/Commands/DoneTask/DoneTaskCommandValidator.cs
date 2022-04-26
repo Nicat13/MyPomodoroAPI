@@ -1,11 +1,11 @@
 using System;
 using FluentValidation;
 
-namespace MyPomodoro.Application.Features.Tasks.Commands.DeleteTask
+namespace MyPomodoro.Application.Features.Tasks.Commands.DoneTask
 {
-    public class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskCommand>
+    public class DoneTaskCommandValidator : AbstractValidator<DoneTaskCommand>
     {
-        public DeleteTaskCommandValidator()
+        public DoneTaskCommandValidator()
         {
             RuleFor(p => p.Id)
                 .NotEmpty().WithMessage("{PropertyName} is required.")

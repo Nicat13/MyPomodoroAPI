@@ -46,7 +46,7 @@ namespace MyPomodoro.WebApi.Controllers
         {
             return Ok(await Mediator.Send(command));
         }
-        [HttpDelete("[action]")]
+        [HttpPut("[action]")]
         [Authorize]
         public async Task<IActionResult> DeletePomodoro([FromBody] DeletePomodoroCommand command)
         {

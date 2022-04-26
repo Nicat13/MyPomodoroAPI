@@ -12,12 +12,14 @@ namespace MyPomodoro.Domain.Entities
             UserConfigurations = new HashSet<UserConfiguration>();
             PomodoroSessions = new HashSet<PomodoroSession>();
             SessionParticipiants = new HashSet<SessionParticipiant>();
+            WebPushSubscriptions = new HashSet<WebPushSubscription>();
         }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int? RefreshTokenId { get; set; }
         public RefreshToken RefreshToken { get; set; }
         public virtual ICollection<Pomodoro> Pomodoros { get; set; }
+        public virtual ICollection<WebPushSubscription> WebPushSubscriptions { get; set; }
         public virtual ICollection<Task> Tasks { get; set; }
         public virtual ICollection<PomodoroSession> PomodoroSessions { get; set; }
         public virtual ICollection<UserConfiguration> UserConfigurations { get; set; }

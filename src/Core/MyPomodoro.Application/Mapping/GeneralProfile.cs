@@ -4,6 +4,7 @@ using MyPomodoro.Application.DTOs.ViewModels;
 using MyPomodoro.Application.Features.Pomodoros.Commands.CreatePomodoro;
 using MyPomodoro.Application.Features.Pomodoros.Commands.UpdatePomodoro;
 using MyPomodoro.Application.Features.Tasks.Commands.CreateTask;
+using MyPomodoro.Application.Features.Tasks.Commands.UpdateTask;
 using MyPomodoro.Application.Features.Users.Commands.UpdateUserConfiguration;
 using MyPomodoro.Domain.Entities;
 
@@ -21,6 +22,8 @@ namespace MyPomodoro.Application.Mapping
             CreateMap<PomodoroDetailsViewModel, PomodoroSessionDetailsViewModel>();
             CreateMap<CreateTaskCommand, Task>();
             CreateMap<Task, CreatedTaskViewModel>();
+            CreateMap<UpdateTaskCommand, Task>();
+
         }
     }
 }
