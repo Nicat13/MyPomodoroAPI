@@ -3,11 +3,13 @@ using System.Data.Common;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
 using MyPomodoro.Application.Interfaces.Repositories;
 using MyPomodoro.Application.Interfaces.UnitOfWork;
 using MyPomodoro.Infrastructure.Persistence.Contexts;
 using MyPomodoro.Infrastructure.Persistence.Dapper;
 using MyPomodoro.Infrastructure.Persistence.Repositories;
+using MyPomodoro.Infrastructure.Persistence.Settings;
 
 namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
 {
@@ -22,7 +24,8 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
         readonly IPomodoroSessionRepository _pomodoroSessionRepository;
         readonly ISessionParticipiantRepository _sessionParticipiantRepository;
         readonly ITaskRepository _taskRepository;
-        public Uow(IUowContext connectionContext, IdentityContext context)
+        readonly IWebPushRepository _webPushRepository;
+        public Uow(IUowContext connectionContext, IdentityContext context, IOptions<APIAppSettings> apiSettings)
         {
             _context = context;
             ConnContext = connectionContext;
@@ -34,12 +37,14 @@ namespace MyPomodoro.Infrastructure.Persistence.UnitOfWork
             _pomodoroSessionRepository = new PomodoroSessionRepository(dapper, context);
             _sessionParticipiantRepository = new SessionParticipiantRepository(dapper, context);
             _taskRepository = new TaskRepository(dapper, context);
+            _webPushRepository = new WebPushRepository(dapper, context, apiSettings);
         }
         public IPomodoroRepository PomodoroRepository => _pomodoroRepository;
         public IUserConfigurationRepository UserConfigurationRepository => _userConfigurationRepository;
         public IPomodoroSessionRepository PomodoroSessionRepository => _pomodoroSessionRepository;
         public ISessionParticipiantRepository SessionParticipiantRepository => _sessionParticipiantRepository;
         public ITaskRepository TaskRepository => _taskRepository;
+        public IWebPushRepository WebPushRepository => _webPushRepository;
         public ITestRepo TestRepo => _testrepo;
 
         public IUowContext ConnContext { get; set; }

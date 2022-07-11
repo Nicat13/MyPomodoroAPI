@@ -17,6 +17,7 @@ namespace MyPomodoro.Domain.Entities
         public double TotalPomodoroTime { get; set; }
         public double TotalShortBreakTime { get; set; }
         public double TotalLongBreakTime { get; set; }
+        public int TotalPomodoroPeriod { get; set; }
         public int CurrentPomodoroPeriod { get; set; }
         public PomodoroSteps CurrentStep { get; set; }
         public PomodoroStatuses CurrentStatus { get; set; }

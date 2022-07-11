@@ -7,5 +7,6 @@ namespace MyPomodoro.Infrastructure.Persistence.Settings
         public string ClientAppOrigin { get; set; }
         public MailSettings MailSettings { get; set; }
         public JWTSettings JWTSettings { get; set; }
+        public VapidSettings VapidSettings { get; set; }
     }
 }

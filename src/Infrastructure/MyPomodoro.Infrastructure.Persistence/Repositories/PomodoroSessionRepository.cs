@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
@@ -78,6 +79,28 @@ namespace MyPomodoro.Infrastructure.Persistence.Repositories
         public async Task<PomodoroSession> GetSessionBySessionShareCode(string sessionShareCode)
         {
             return await _context.PomodoroSessions.FirstOrDefaultAsync(x => x.SessionShareCode == sessionShareCode && x.IsActive == true);
+        }
+
+        public List<SessionLobbyViewModel> GetSessionLobbies(string userId)
+        {
+            string sql = @"SELECT U.UserName,P.Name as PomodoroName,PS.SessionShareCode,CASE WHEN [Password] IS NULL THEN 0 ELSE 1 END 'HasPass' FROM PomodoroSessions PS
+                            LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                            LEFT JOIN Users U ON PS.UserId=U.Id
+                            WHERE PS.SessionType=1 AND PS.IsActive=1 and PS.UserId<>@USER_ID";
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("USER_ID", userId);
+            return dapper.GetAll<SessionLobbyViewModel>(sql, parameters).ToList();
+        }
+
+        public List<SessionParticipiantViewModel> GetSessionParticipiants(int sessionId)
+        {
+            string sql = @"SELECT DISTINCT U.UserName FROM SessionParticipiants SP
+                            LEFT JOIN PomodoroSessions PS ON SP.SessionId=PS.Id
+                            LEFT JOIN Users U ON SP.UserId=U.Id OR PS.UserId=U.Id
+                            WHERE SP.SessionId=@SESSION_ID AND SP.IsJoined=1";
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("SESSION_ID", sessionId);
+            return dapper.GetAll<SessionParticipiantViewModel>(sql, parameters).ToList();
         }
     }
 }

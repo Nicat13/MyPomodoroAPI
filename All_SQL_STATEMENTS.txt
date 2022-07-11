@@ -7,3 +7,124 @@ BEGIN
 	INSERT INTO UserConfigurations(AutoStartPomodoros,AutoStartBreaks,EmailNotification,PushNotification,UserId)
 	VALUES(0,0,0,1,(SELECT Id FROM INSERTED))
 END
+
+--------------------------------------------------------------------------------------------------------------------------
+
+SELECT P.UserId, P.Id AS SessionId, WP.P256Dh, WP.Auth,WP.Endpoint,WP.ExpirationTime FROM PomodoroSessions P 
+LEFT JOIN WebPushSubscriptions WP ON P.UserId=WP.UserId
+WHERE P.IsActive=1 AND P.CurrentStatus=1
+AND CONVERT(float,P.CurrentTime-(DATEDIFF(SECOND,P.StatusChangeTime,CONVERT(DATETIME,GETDATE() at time zone 'Azerbaijan Standard Time'))/60.00))<=0
+
+---------------------------------------------------------------------------------------------------------------------------
+
+SELECT UC.UserId, P.Id AS SessionId, U.Email, WP.P256Dh, WP.Auth, WP.Endpoint, WP.ExpirationTime, (SELECT
+CASE WHEN EmailNotification=1 AND PushNotification=1 THEN 2 
+WHEN PushNotification=1 THEN 0
+WHEN EmailNotification=1 THEN 1         
+ELSE 3
+END 'NOTFTYPE'
+FROM UserConfigurations
+WHERE UserId=UC.UserId) AS NotfType
+FROM PomodoroSessions P
+LEFT JOIN SessionParticipiants SP ON P.Id=SP.SessionId AND SP.IsJoined=1
+LEFT JOIN UserConfigurations UC ON P.UserId=UC.UserId OR SP.UserId=UC.UserId
+LEFT JOIN Users U ON UC.UserId=U.Id
+LEFT JOIN WebPushSubscriptions WP ON UC.UserId=WP.UserId
+WHERE P.IsActive=1 AND P.CurrentStatus=1 AND (UC.PushNotification=1 OR UC.EmailNotification=1)
+AND CONVERT(float,P.CurrentTime-(DATEDIFF(SECOND,P.StatusChangeTime,CONVERT(DATETIME,GETDATE() at time zone 'Azerbaijan Standard Time'))/60.00))<=0
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+UPDATE PomodoroSessions
+                        SET CurrentStatus=(SELECT
+                        CASE WHEN (UC.AutoStartBreaks=1 AND UC.AutoStartPomodoros=1) AND CAST(P.PeriodCount AS float)>CAST(PS.CurrentPomodoroPeriod AS float)/CAST(P.LongBreakInterval AS float) THEN 1
+                        WHEN (UC.AutoStartBreaks=1 AND PS.CurrentStep=0) AND CAST(P.PeriodCount AS float)>=CAST(PS.CurrentPomodoroPeriod AS float)/CAST(P.LongBreakInterval AS float) THEN 1
+                        WHEN (UC.AutoStartPomodoros=1 AND PS.CurrentStep<>0) AND CAST(P.PeriodCount AS float)>CAST(PS.CurrentPomodoroPeriod AS float)/CAST(P.LongBreakInterval AS float) THEN 1
+                        ELSE 0
+                        END 'CurrentStatus'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        CurrentTime=(SELECT
+                        CASE WHEN(PS.CurrentStep=2) THEN P.PomodoroTime
+                        WHEN PS.CurrentStep=1 THEN P.PomodoroTime
+                        WHEN (PS.CurrentStep=0 AND PS.CurrentPomodoroPeriod%P.LongBreakInterval=0) THEN P.LongBreakTime
+                        WHEN PS.CurrentStep=0 THEN P.ShortBreakTime
+                        ELSE (SELECT CASE WHEN CONVERT(float,PS.CurrentTime-(DATEDIFF(SECOND,PS.StatusChangeTime,CONVERT(DATETIME,GETDATE() at time zone 'Azerbaijan Standard Time'))/60.00))>0 THEN CONVERT(float,PS.CurrentTime-(DATEDIFF(SECOND,PS.StatusChangeTime,CONVERT(DATETIME,GETDATE() at time zone 'Azerbaijan Standard Time'))/60.00))
+                        ELSE 0 END 'TIME')
+                        END 'CurrentTime'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        StatusChangeTime=(SELECT
+                        CASE WHEN (UC.AutoStartPomodoros=1 OR UC.AutoStartBreaks=1) THEN CONVERT(DATETIME,GETDATE() at time zone 'Azerbaijan Standard Time') 
+                        ELSE PS.StatusChangeTime
+                        END 'StatusChangeTime'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        TotalPomodoroTime=(SELECT
+                        CASE WHEN PS.CurrentStep=0 THEN CONVERT(float,PS.TotalPomodoroTime+P.PomodoroTime)
+                        ELSE PS.TotalPomodoroTime
+                        END 'TotalPomodoroTime'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        TotalLongBreakTime=(SELECT
+                        CASE WHEN PS.CurrentStep=2 THEN CONVERT(float,PS.TotalLongBreakTime+P.LongBreakTime)
+                        ELSE PS.TotalLongBreakTime
+                        END 'TotalLongBreakTime'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        TotalShortBreakTime=(SELECT
+                        CASE WHEN PS.CurrentStep=1 THEN CONVERT(float,PS.TotalShortBreakTime+P.ShortBreakTime)
+                        ELSE PS.TotalShortBreakTime
+                        END 'TotalShortBreakTime'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        CurrentStep=(SELECT
+                        CASE WHEN(PS.CurrentStep=2) THEN 0
+                        WHEN PS.CurrentStep=1 THEN 0
+                        WHEN (PS.CurrentStep=0 AND PS.CurrentPomodoroPeriod%P.LongBreakInterval=0) THEN 2
+                        WHEN PS.CurrentStep=0 THEN 1 
+                        ELSE PS.CurrentStep
+                        END 'CurrentStep'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        TotalPomodoroPeriod=(SELECT
+                        CASE WHEN CAST(P.PeriodCount AS float)<CAST(PS.CurrentPomodoroPeriod+1 AS float)/CAST(P.LongBreakInterval AS float) AND PS.CurrentStep<>0 THEN PS.TotalPomodoroPeriod+PS.CurrentPomodoroPeriod
+                        ELSE PS.TotalPomodoroPeriod
+                        END 'TotalPomodoroPeriod'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id),
+
+                        CurrentPomodoroPeriod=
+                        (SELECT
+                        CASE WHEN CAST(P.PeriodCount AS float)>CAST(PS.CurrentPomodoroPeriod AS float)/CAST(P.LongBreakInterval AS float) AND PS.CurrentStep<>0 THEN PS.CurrentPomodoroPeriod+1
+                        WHEN PS.CurrentStep=0 THEN PS.CurrentPomodoroPeriod
+                        ELSE 1
+                        END 'CurrentPomodoroPeriod'
+                        FROM PomodoroSessions PS
+                        LEFT JOIN Pomodoros P ON PS.PomodoroId=P.Id
+                        LEFT JOIN UserConfigurations UC ON PS.UserId=UC.UserId
+                        WHERE PS.Id=PomodoroSessions.Id)
+                        WHERE Id IN({s1})

@@ -10,6 +10,8 @@ using MyPomodoro.Application.Features.PomodoroSessions.Commands.SessionAction;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetActiveSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetJoinedSession;
 using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetJoinedSessionDetails;
+using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetSessionLobbies;
+using MyPomodoro.Application.Features.PomodoroSessions.Queries.GetSessionParticipiants;
 
 namespace MyPomodoro.WebApi.Controllers
 {
@@ -41,6 +43,18 @@ namespace MyPomodoro.WebApi.Controllers
         public async Task<IActionResult> JoinedSessionDetails()
         {
             return Ok(await Mediator.Send(new GetJoinedSessionDetailsQuery()));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> SessionLobbies()
+        {
+            return Ok(await Mediator.Send(new GetSessionLobbiesQuery()));
+        }
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> SessionParticipiants()
+        {
+            return Ok(await Mediator.Send(new GetSessionParticipiantsQuery()));
         }
         [HttpPut("[action]")]
         [Authorize]

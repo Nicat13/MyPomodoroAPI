@@ -45,6 +45,10 @@ namespace MyPomodoro.Application.Features.PomodoroSessions.Commands.EndSession
                             throw new HttpStatusException(new List<string> { "There is no active session." });
                         }
                         var sessionModel = await uow.PomodoroSessionRepository.GetByIdAsync(ActiveSession.Id);
+                        if (sessionModel.CurrentStatus != PomodoroStatuses.Stop)
+                        {
+                            throw new HttpStatusException(new List<string> { "Firstly stop session." });
+                        }
                         sessionModel.IsActive = false;
                         uow.PomodoroSessionRepository.Update(sessionModel);
                         await uow.SaveChangesAsync();

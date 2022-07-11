@@ -23,6 +23,7 @@ namespace MyPomodoro.Application.Mapping
             CreateMap<CreateTaskCommand, Task>();
             CreateMap<Task, CreatedTaskViewModel>();
             CreateMap<UpdateTaskCommand, Task>();
+            CreateMap<WebPushSubscription, PushSubscriptionViewModel>();
 
         }
     }

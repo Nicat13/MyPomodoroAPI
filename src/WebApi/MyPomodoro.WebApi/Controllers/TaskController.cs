@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyPomodoro.Application.DTOs.ViewModels;
 using MyPomodoro.Application.Features.Tasks.Commands.CreateTask;
 using MyPomodoro.Application.Features.Tasks.Commands.DeleteTask;
 using MyPomodoro.Application.Features.Tasks.Commands.DoneTask;
@@ -22,6 +24,7 @@ namespace MyPomodoro.WebApi.Controllers
         }
         [HttpGet("[action]")]
         [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<CreatedTaskViewModel>), 200)]
         public async Task<IActionResult> ActiveSessionTasks()
         {
             return Ok(await Mediator.Send(new GetActiveSessionTasksQuery()));
